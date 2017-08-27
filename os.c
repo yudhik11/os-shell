@@ -21,7 +21,7 @@ void echo(){
         for (int i=1;i<cnt;i++) {
             if (input[i][0]=='$'){
                 const char* s = getenv(input[i]+1);
-                printf("%s\n",(s!=NULL)? s : "");
+                printf("%s",(s!=NULL)? s : "");
             }
             else
                 printf("%s ",input[i]);
@@ -38,7 +38,7 @@ int main (){
     hello=getpwuid(getuid());//user_name
     getcwd(cwd,sizeof (cwd));
     int cwdlen=strlen(cwd);
-    int k=2;
+    int k=20;
     for (int i=0;i<k;i++){
         char pwd[1024];
         pwd[1023] = '\0';
@@ -51,9 +51,9 @@ int main (){
         char inp[10005]={'\0'};
         if (i>0) getchar();
         scanf("%[^\n]s",inp);
-        printf("%s\n",inp);
+        //printf("%s\n",inp);
         getwords(inp);
-       // if (strcmp(input[0],"echo")==0) 
+        if (strcmp(input[0],"echo")==0) 
             echo();
         printf("\n");
 
