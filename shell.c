@@ -11,18 +11,26 @@ char cwd[1024];
 char pwd[1024];
 int implement_cd(char *ch){
 	ch = strtok(NULL," \t");
+	if(ch==NULL){
+		chdir(cwd);
+		return 0;
+	}
 	char save[1024];
 	save[1023]= '\0';
+	if(ch[0]=='~'){
+		strcpy(save,cwd);
+		strcat(save,"/");
+		strcat(save,ch+1);
+		chdir(save);
+		return 0;
+	}
 	getcwd(save,sizeof(save));
-//	printf("%s",save);
 	if(ch[0]!='/'){
 		strcat(save,"/");
 		strcat(save,ch);
-//		printf("1:%s\n",save);
 		chdir(save);
 	}
 	else{
-//		printf("2:%s",ch);
 		chdir(ch);
 	}
 }
