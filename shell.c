@@ -5,21 +5,71 @@
 #include<sys/socket.h>
 #include<netdb.h>
 #include<sys/types.h>
+#include<sys/wait.h>
 #include<pwd.h>
 #include<string.h>
 char input[1005][1005];
 char inp[10005];
-char inp2[10005];
 char cwd[1024];
 char pwd[1024];
+char *input2[1024];
 int cnt=0;
-void getwords(char inp[]){
+
+void background_proc(){
+	int pid = fork();
+	if(pid==0){
+		int p = fork();
+		if(p==0){
+			fprintf(stderr,"[%d]\n",getpid());
+			execvp(input2[0],input2);
+		}
+		else exit(0);
+	}
+	else{
+		wait(NULL);
+	}
+}
+
+void foreground_proc(){
+	int pid = fork();
+	if(pid==0){
+		execvp(input[0],input2);
+	}
+	else{
+		wait(NULL);
+	}
+}
+
+void execute(int len){
+	//int cont=0;
+	for(int i=0;i<len;i++){
+		if(input[i][0]=='&'){
+			input2[i] = NULL;
+			printf("background\n");
+			background_proc();
+			//cont=0;
+			return;
+		}
+		else{
+			input2[i] = input[i];
+		}
+	}
+	input2[len] = NULL;
+//	if(cont > 0){
+		printf("foreground\n");
+//	}
+	foreground_proc();
+}
+
+int getwords(char inp[]){
     cnt=0;
-    char * pch = strtok (inp,"\" \t");
-    while (pch != NULL){
-        strcpy(input[cnt++],pch);
-        pch = strtok (NULL, " \"\t");
+    char *ch = strtok (inp,"\" \t");
+    while (ch != NULL){
+		//printf("%s",input2[cnt]);
+        strcpy(input[cnt++],ch);
+       	ch = strtok (NULL, " \"\t");
     }
+	return cnt;
 }
 int implement_cd(){
  	char ch[100]={'\0'};
@@ -58,7 +108,7 @@ void echo(){
     }
 }
 void verify_cmd(){
-    getwords(inp);
+    cnt = getwords(inp);
     if (strcmp(input[0], "cd")==0){
         implement_cd();
     }
@@ -69,6 +119,9 @@ void verify_cmd(){
         getcwd(temp,sizeof (temp));
         printf("%s\n",temp);
     }
+	else{
+		execute(cnt);
+	}
 }
 
 
@@ -92,7 +145,6 @@ int main (){
         else
             printf("<%s@%s:%s>$ ",hello->pw_name,hostname,pwd);
         memset(inp,0,sizeof(inp));
-        memset(inp2,0,sizeof(inp2));
         if (i>0) getchar();
         scanf("%[^\n]s",inp);
         verify_cmd();
