@@ -207,9 +207,9 @@ void execute(int len){
     foreground_proc();
 }
 
-int getwords(char inp[]){
+int getwords(char *inpt){
     cnt=0;
-    char *ch = strtok (inp,"\" \t");
+    char *ch = strtok (inpt,"\" \t");
     while (ch != NULL){
         //printf("%s",input2[cnt]);
         strcpy(input[cnt++],ch);
@@ -244,76 +244,76 @@ int implement_cd(){
     }
 }
 void pin(int self){
-	if(self==1){
-		FILE * fp;
-		char save[1024]={'\0'};
-		char str[1024] = "/proc";
-		char pid[20];
-		sprintf(pid,"/%d",getpid());
-		strcat(str,pid); // /proc/<pid>
-		strcpy(save,str); // /proc/<pid>
-		strcat(save,"/status"); // /proc/<pid>/status
-//		fprintf(stderr,"save:%s\n",save);
-		fp = fopen(save,"r");
-		char store[200],scanner[200],proc_status[200],virt_mem[200];;
-		int len = 0;
-		while(1){
-			fgets(store,200,fp);
-		//	len = strlen(store);
-//			printf("store:%s\n",store);
+    if(self==1){
+        FILE * fp;
+        char save[1024]={'\0'};
+        char str[1024] = "/proc";
+        char pid[20];
+        sprintf(pid,"/%d",getpid());
+        strcat(str,pid); // /proc/<pid>
+        strcpy(save,str); // /proc/<pid>
+        strcat(save,"/status"); // /proc/<pid>/status
+        //		fprintf(stderr,"save:%s\n",save);
+        fp = fopen(save,"r");
+        char store[200],scanner[200],proc_status[200],virt_mem[200];;
+        int len = 0;
+        while(1){
+            fgets(store,200,fp);
+            //	len = strlen(store);
+            //			printf("store:%s\n",store);
 
-			if(strstr(store,"State") != NULL){
-				fscanf(fp,"%s %s",scanner,proc_status);
-			}
-			else if(strstr(store,"VmPeak") != NULL){
-				fscanf(fp,"%s %s",scanner,virt_mem);
-				break;
-			}
-		}
-		printf("pid -- %d\n",getpid());
-		printf("Process Status -- %s\n",proc_status);
-		printf("Virtual Memory -- %s\n",virt_mem);
-		printf("Executable Path -- ~/a.out\n");
-		fclose(fp);
-	}
-	else{
-		FILE *fp;
-		char save[1024]={'\0'};
-		char str[1024] = "/proc";
-		char pid[20];
-		char buff[2000];
+            if(strstr(store,"State") != NULL){
+                fscanf(fp,"%s %s",scanner,proc_status);
+            }
+            else if(strstr(store,"VmPeak") != NULL){
+                fscanf(fp,"%s %s",scanner,virt_mem);
+                break;
+            }
+        }
+        printf("pid -- %d\n",getpid());
+        printf("Process Status -- %s\n",proc_status);
+        printf("Virtual Memory -- %s\n",virt_mem);
+        printf("Executable Path -- ~/a.out\n");
+        fclose(fp);
+    }
+    else{
+        FILE *fp;
+        char save[1024]={'\0'};
+        char str[1024] = "/proc";
+        char pid[20];
+        char buff[2000];
 
-		sprintf(pid,"/%s",input[1]);
-		strcat(str,pid); // /proc/<pid>
-		strcpy(save,str); // /proc/<pid>
-		strcat(save,"/status"); // /proc/<pid>/status
-		strcat(str,"/exe"); // str = /proc/<pid>/exe
-//		fprintf(stderr,"save:%s\n",save);
-		fp = fopen(save,"r");
-		char store[200],scanner[200],proc_status[200],virt_mem[200];;
-		int len = 0;
-		while(1){
-			fgets(store,200,fp);
-//			printf("store:%s\n",store);
+        sprintf(pid,"/%s",input[1]);
+        strcat(str,pid); // /proc/<pid>
+        strcpy(save,str); // /proc/<pid>
+        strcat(save,"/status"); // /proc/<pid>/status
+        strcat(str,"/exe"); // str = /proc/<pid>/exe
+        //		fprintf(stderr,"save:%s\n",save);
+        fp = fopen(save,"r");
+        char store[200],scanner[200],proc_status[200],virt_mem[200];;
+        int len = 0;
+        while(1){
+            fgets(store,200,fp);
+            //			printf("store:%s\n",store);
 
-			if(strstr(store,"State") != NULL){
-				fscanf(fp,"%s %s",scanner,proc_status);
-			}
-			else if(strstr(store,"VmPeak") != NULL){
-				fscanf(fp,"%s %s",scanner,virt_mem);
-				break;
-			}
-		}
-		ssize_t ret = readlink(str, buff, 512);
-		if (ret < 0){
-		  perror("readlink");
-		}
-		else buff[ret] = 0;
-		printf("pid -- %d\n",getpid());
-		printf("Process Status -- %s\n",proc_status);
-		printf("Virtual Memory -- %s\n",virt_mem);
-		printf("Executable Path --%s\n",buff);
-	}
+            if(strstr(store,"State") != NULL){
+                fscanf(fp,"%s %s",scanner,proc_status);
+            }
+            else if(strstr(store,"VmPeak") != NULL){
+                fscanf(fp,"%s %s",scanner,virt_mem);
+                break;
+            }
+        }
+        ssize_t ret = readlink(str, buff, 512);
+        if (ret < 0){
+            perror("readlink");
+        }
+        else buff[ret] = 0;
+        printf("pid -- %d\n",getpid());
+        printf("Process Status -- %s\n",proc_status);
+        printf("Virtual Memory -- %s\n",virt_mem);
+        printf("Executable Path --%s\n",buff);
+    }
 
 }
 
@@ -326,32 +326,32 @@ void echo(){
         }
         else
             printf("%s ",input[i]);
-        printf("\n");
     }
+    printf("\n");
 }
-void verify_cmd(){
-    cnt = getwords(inp);
+void verify_cmd(char *inpt){
+    cnt = getwords(inpt);
     if (strcmp(input[0], "cd")==0){
         implement_cd();
     }
-	else if (strcmp(input[0],"echo")==0) 
+    else if (strcmp(input[0],"echo")==0) 
         echo();
-	else if (strcmp(input[0],"pwd")==0){
+    else if (strcmp(input[0],"pwd")==0){
         char temp[1023] = {'\0'};
         getcwd(temp,sizeof (temp));
         printf("%s\n",temp);
     }
-	else if (strcmp(input[0],"ls")==0){
+    else if (strcmp(input[0],"ls")==0){
         ls();
     }
-	else if(strcmp(input[0],"pinfo")==0){
-		if(strlen(input[1])==0){
-			pin(1);
-		}
-		else{
-			pin(0);
-		}
-	}
+    else if(strcmp(input[0],"pinfo")==0){
+        if(strlen(input[1])==0){
+            pin(1);
+        }
+        else{
+            pin(0);
+        }
+    }
     else{
         execute(cnt);
     }
@@ -367,8 +367,7 @@ int main (){
     getcwd(cwd,sizeof (cwd));
     int cwdlen=strlen(cwd);
     int k=20;
-    for (int i=0;i<k;i++){
-        memset(input,0,sizeof(input));
+    while(1){
         pwd[1023] = '\0';
         getcwd(pwd,sizeof (pwd));
         int pwdlen=strlen(pwd);
@@ -377,9 +376,25 @@ int main (){
         else
             printf("<%s@%s:%s>$ ",hello->pw_name,hostname,pwd);
         memset(inp,0,sizeof(inp));
-        if (i>0) getchar();
-        scanf("%[^\n]s",inp);
-        verify_cmd();
+        char x=getchar();
+        if (x=='\n')
+            scanf("%[^\n]s",inp);
+        else{
+            inp[0]=x;
+            scanf("%[^\n]s",inp+1);
+        }
+        if (inp[strlen(inp)-1]!=';') inp[strlen(inp)]=';';
+        cnt=0;
+        char *string=inp;
+        char *cmd = strchr(string,';');
+        while (cmd != NULL){
+        memset(input,0,sizeof(input));
+            *cmd++='\0';
+            char *temp=string;
+            verify_cmd(temp);
+            string=cmd;
+            cmd = strchr (string,';');
+        }
     }
     return 0;
 }
