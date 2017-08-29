@@ -243,6 +243,81 @@ int implement_cd(){
         chdir(ch);
     }
 }
+void pin(int self){
+	if(self==1){
+		FILE * fp;
+		char save[1024]={'\0'};
+		char str[1024] = "/proc";
+		char pid[20];
+		sprintf(pid,"/%d",getpid());
+		strcat(str,pid); // /proc/<pid>
+		strcpy(save,str); // /proc/<pid>
+		strcat(save,"/status"); // /proc/<pid>/status
+//		fprintf(stderr,"save:%s\n",save);
+		fp = fopen(save,"r");
+		char store[200],scanner[200],proc_status[200],virt_mem[200];;
+		int len = 0;
+		while(1){
+			fgets(store,200,fp);
+		//	len = strlen(store);
+//			printf("store:%s\n",store);
+
+			if(strstr(store,"State") != NULL){
+				fscanf(fp,"%s %s",scanner,proc_status);
+			}
+			else if(strstr(store,"VmPeak") != NULL){
+				fscanf(fp,"%s %s",scanner,virt_mem);
+				break;
+			}
+		}
+		printf("pid -- %d\n",getpid());
+		printf("Process Status -- %s\n",proc_status);
+		printf("Virtual Memory -- %s\n",virt_mem);
+		printf("Executable Path -- ~/a.out\n");
+		fclose(fp);
+	}
+	else{
+		FILE *fp;
+		char save[1024]={'\0'};
+		char str[1024] = "/proc";
+		char pid[20];
+		char buff[2000];
+
+		sprintf(pid,"/%s",input[1]);
+		strcat(str,pid); // /proc/<pid>
+		strcpy(save,str); // /proc/<pid>
+		strcat(save,"/status"); // /proc/<pid>/status
+		strcat(str,"/exe"); // str = /proc/<pid>/exe
+//		fprintf(stderr,"save:%s\n",save);
+		fp = fopen(save,"r");
+		char store[200],scanner[200],proc_status[200],virt_mem[200];;
+		int len = 0;
+		while(1){
+			fgets(store,200,fp);
+//			printf("store:%s\n",store);
+
+			if(strstr(store,"State") != NULL){
+				fscanf(fp,"%s %s",scanner,proc_status);
+			}
+			else if(strstr(store,"VmPeak") != NULL){
+				fscanf(fp,"%s %s",scanner,virt_mem);
+				break;
+			}
+		}
+		ssize_t ret = readlink(str, buff, 512);
+		if (ret < 0){
+		  perror("readlink");
+		}
+		else buff[ret] = 0;
+		printf("pid -- %d\n",getpid());
+		printf("Process Status -- %s\n",proc_status);
+		printf("Virtual Memory -- %s\n",virt_mem);
+		printf("Executable Path --%s\n",buff);
+	}
+
+}
+
+
 void echo(){
     for (int i=1;i<cnt;i++) {
         if (input[i][0]=='$'){
@@ -259,16 +334,24 @@ void verify_cmd(){
     if (strcmp(input[0], "cd")==0){
         implement_cd();
     }
-    if (strcmp(input[0],"echo")==0) 
+	else if (strcmp(input[0],"echo")==0) 
         echo();
-    if (strcmp(input[0],"pwd")==0){
+	else if (strcmp(input[0],"pwd")==0){
         char temp[1023] = {'\0'};
         getcwd(temp,sizeof (temp));
         printf("%s\n",temp);
     }
-    if (strcmp(input[0],"ls")==0){
+	else if (strcmp(input[0],"ls")==0){
         ls();
     }
+	else if(strcmp(input[0],"pinfo")==0){
+		if(strlen(input[1])==0){
+			pin(1);
+		}
+		else{
+			pin(0);
+		}
+	}
     else{
         execute(cnt);
     }
