@@ -24,10 +24,13 @@ void background_proc(){
         int p = fork();
         if(p==0){
             fprintf(stderr,"[%d]\n",getpid());
-            execvp(input2[0],input2);
+            int val = execvp(input2[0],input2);
+			if(val < 0){
+				perror("Execution failed");
+			}
         }
-        else exit(0);
-    }
+		else exit(0);
+	}
     else{
         wait(NULL);
     }
@@ -114,7 +117,7 @@ void ls(){
                 printf("%s %s ",sz+20-ln,date+4);
                 printf(" %s\n", myfile->d_name);
             }
-            else printf("%s ", myfile->d_name);
+            else printf("%s\t", myfile->d_name);
         }
         if (!det) printf("\n");
         closedir(mydir);
@@ -165,7 +168,7 @@ void ls(){
                         printf("%s %s ",sz+20-10,date+4);
                         printf(" %s\n", myfile->d_name);
                     }
-                    else printf("%s ", myfile->d_name);
+                    else printf("%s\t", myfile->d_name);
                     break;
                 }
                 if (flag==0)
@@ -179,9 +182,12 @@ void ls(){
 void foreground_proc(){
     int pid = fork();
     if(pid==0){
-        execvp(input[0],input2);
+		int val = execvp(input2[0],input2);
+			if(val < 0){
+				perror("Execution failed");
+			}
     }
-    else{
+   else{
         wait(NULL);
     }
 }
@@ -223,98 +229,109 @@ int implement_cd(){
     char save[1024];
     save[1023] = '\0';
     if(strlen(ch)==0){
-        chdir(cwd);
+		int val = chdir(cwd);
+		if(val < 0){
+			perror("cd failed");
+		}
+
         return 0;
     }
     if(ch[0]=='~'){
         strcpy(save,cwd);
         strcat(save,"/");
         strcat(save,ch+1);
-        chdir(save);
+        int val = chdir(save);
+		if(val < 0){
+			perror("cd failed");
+		}
         return 0;
     }
     getcwd(save,sizeof(save));
     if(ch[0]!='/'){
         strcat(save,"/");
         strcat(save,ch);
-        chdir(save);
+		int val = chdir(save);
+			if(val < 0){
+				perror("cd failed");
+			}
     }
     else{
-        chdir(ch);
+		int val = chdir(ch);
+		if(val < 0){
+			perror("cd failed");
+		}
     }
 }
 void pin(int self){
-    if(self==1){
-        FILE * fp;
-        char save[1024]={'\0'};
-        char str[1024] = "/proc";
-        char pid[20];
-        sprintf(pid,"/%d",getpid());
-        strcat(str,pid); // /proc/<pid>
-        strcpy(save,str); // /proc/<pid>
-        strcat(save,"/status"); // /proc/<pid>/status
-        //		fprintf(stderr,"save:%s\n",save);
-        fp = fopen(save,"r");
-        char store[200],scanner[200],proc_status[200],virt_mem[200];;
-        int len = 0;
-        while(1){
-            fgets(store,200,fp);
-            //	len = strlen(store);
-            //			printf("store:%s\n",store);
-
-            if(strstr(store,"State") != NULL){
-                fscanf(fp,"%s %s",scanner,proc_status);
-            }
-            else if(strstr(store,"VmPeak") != NULL){
-                fscanf(fp,"%s %s",scanner,virt_mem);
-                break;
-            }
-        }
-        printf("pid -- %d\n",getpid());
-        printf("Process Status -- %s\n",proc_status);
-        printf("Virtual Memory -- %s\n",virt_mem);
-        printf("Executable Path -- ~/a.out\n");
-        fclose(fp);
-    }
-    else{
-        FILE *fp;
-        char save[1024]={'\0'};
-        char str[1024] = "/proc";
-        char pid[20];
-        char buff[2000];
-
-        sprintf(pid,"/%s",input[1]);
-        strcat(str,pid); // /proc/<pid>
-        strcpy(save,str); // /proc/<pid>
-        strcat(save,"/status"); // /proc/<pid>/status
-        strcat(str,"/exe"); // str = /proc/<pid>/exe
-        //		fprintf(stderr,"save:%s\n",save);
-        fp = fopen(save,"r");
-        char store[200],scanner[200],proc_status[200],virt_mem[200];;
-        int len = 0;
-        while(1){
-            fgets(store,200,fp);
-            //			printf("store:%s\n",store);
-
-            if(strstr(store,"State") != NULL){
-                fscanf(fp,"%s %s",scanner,proc_status);
-            }
-            else if(strstr(store,"VmPeak") != NULL){
-                fscanf(fp,"%s %s",scanner,virt_mem);
-                break;
-            }
-        }
-        ssize_t ret = readlink(str, buff, 512);
-        if (ret < 0){
-            perror("readlink");
-        }
-        else buff[ret] = 0;
-        printf("pid -- %d\n",getpid());
-        printf("Process Status -- %s\n",proc_status);
-        printf("Virtual Memory -- %s\n",virt_mem);
-        printf("Executable Path --%s\n",buff);
-    }
-
+	FILE * fp=NULL;
+	char save[1024]={'\0'};
+	char str[1024] = "/proc";
+	char pid[20];		
+	if(self==1){
+		sprintf(pid,"/%d",getpid());
+		strcat(str,pid); // /proc/<pid>
+		strcpy(save,str); // /proc/<pid>
+		strcat(save,"/status"); // /proc/<pid>/status
+		fp = fopen(save,"r");
+		if(fp==NULL){
+			perror("File Not Opened");
+			return;
+		}
+		char store[200],scanner[200],proc_status[200],virt_mem[200];;
+		int len = 0;
+		while(1){
+			fgets(store,200,fp);
+			if(strstr(store,"State") != NULL){
+				sprintf(proc_status,"%s",store+7);
+			}
+			else if(strstr(store,"VmSize") != NULL){
+				sprintf(virt_mem,"%s",store+8);
+				break;
+			}
+		}
+		printf("pid -- %d\n",getpid());
+		printf("Process Status -- %s",proc_status);
+		printf("Virtual Memory -- %s",virt_mem);
+		printf("Executable Path -- ~/a.out\n");
+	}
+	else{
+		char buff[2000];
+		sprintf(pid,"/%s",input[1]);
+		strcat(str,pid); // /proc/<pid>
+		strcpy(save,str); // /proc/<pid>
+		strcat(save,"/status"); // /proc/<pid>/status
+		strcat(str,"/exe"); // str = /proc/<pid>/exe
+		fp = fopen(save,"r");
+		if(fp==NULL){
+			perror("File Not Opened");
+			return;
+		}
+		char store[200],scanner[200],proc_status[200],virt_mem[200];;
+		int len = 0;
+		while(1){
+			fgets(store,200,fp);
+			if(strstr(store,"State") != NULL){
+				sprintf(proc_status,"%s",store+7);
+			}
+			else if(strstr(store,"VmSize") != NULL){
+				sprintf(virt_mem,"%s",store+8);
+				break;
+			}
+		}
+		ssize_t ret = readlink(str, buff, 512);
+		if (ret < 0){
+		  perror("readlink");
+		}
+		else buff[ret] = 0;
+		printf("pid -- %d\n",getpid());
+		printf("Process Status -- %s",proc_status);
+		printf("Virtual Memory -- %s",virt_mem);
+		printf("Executable Path --%s\n",buff);
+	}
+	if(fp!=NULL){
+		fclose(fp);
+		fp = NULL;
+	}
 }
 
 
