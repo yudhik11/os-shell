@@ -1,3 +1,6 @@
+#ifndef aa
+#define aa 
+
 void fz(char *sz,long int val){
     if (!val) return ;
     len--;
@@ -141,3 +144,4 @@ void ls(){
         if (!det) printf("\n");
     }
 }
+#endif

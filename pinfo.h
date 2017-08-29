@@ -1,3 +1,6 @@
+#ifndef ya
+#define ya  
+
 void pin(int self){
 	FILE * fp=NULL;
 	char save[1024]={'\0'};
@@ -69,3 +72,4 @@ void pin(int self){
 		fp = NULL;
 	}
 }
+#endif

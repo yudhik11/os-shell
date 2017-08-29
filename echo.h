@@ -1,3 +1,5 @@
+#ifndef xa
+#define xa 
 void echo(){
     for (int i=1;i<cnt;i++) {
         if (input[i][0]=='$'){
@@ -9,3 +11,4 @@ void echo(){
     }
     printf("\n");
 }
+#endif

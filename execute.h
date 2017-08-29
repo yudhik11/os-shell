@@ -1,3 +1,6 @@
+#ifndef ba
+#define ba  
+
 void background_proc(){
     int pid = fork();
     if(pid==0){
@@ -45,3 +48,4 @@ void execute(int len){
     printf("foreground\n");
     foreground_proc();
 }
+#endif

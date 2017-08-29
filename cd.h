@@ -1,3 +1,6 @@
+#ifndef za
+#define za  
+
 int implement_cd(){
     char ch[100]={'\0'};
     strcpy(ch,input[1]);
@@ -37,3 +40,4 @@ int implement_cd(){
 		}
     }
 }
+#endif
