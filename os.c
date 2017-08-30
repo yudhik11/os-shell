@@ -23,8 +23,9 @@ int cnt=0,len=0;
 #include "cd.h"
 #include "ls.h"
 #include "execute.h"
-
-
+#define KGRN  "\x1B[32m"
+#define KWHT  "\x1B[37m"
+#define KBLU  "\x1B[34m"
 
 int getwords(char *inpt){
     cnt=0;
@@ -80,10 +81,12 @@ int main (){
         pwd[1023] = '\0';
         getcwd(pwd,sizeof (pwd));
         int pwdlen=strlen(pwd);
-        if (pwdlen>=cwdlen)
-            printf("<%s@%s:~%s>$ ",hello->pw_name,hostname,pwd+cwdlen);
+		char compare[1024]={'\0'};
+		strcpy(compare,pwd);
+        if (strcmp(compare,cwd)==0 && pwdlen>=cwdlen)
+            printf("%s<%s@%s:%s~%s>%s$ ",KGRN,hello->pw_name,hostname,KBLU,pwd+cwdlen,KWHT);
         else
-            printf("<%s@%s:%s>$ ",hello->pw_name,hostname,pwd);
+            printf("%s<%s@%s:%s%s>%s$ ",KGRN,hello->pw_name,hostname,KBLU,pwd,KWHT);
         memset(inp,0,sizeof(inp));
         char x=getchar();
         if (x=='\n')

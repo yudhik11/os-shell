@@ -45,7 +45,6 @@ void execute(int len){
         }
     }
     input2[len] = NULL;
-    printf("foreground\n");
     foreground_proc();
 }
 #endif
