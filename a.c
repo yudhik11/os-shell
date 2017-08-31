@@ -12,7 +12,7 @@
 int main()
 {
 	char str[] = "hello world";
-    printf("%sred%s\n",KRED,str);
+    printf("%s %sred%s\n",str,KRED,str);
     printf("%sgreen\n", KGRN);
     printf("%syellow\n", KYEL);
     printf("%sblue\n", KBLU);

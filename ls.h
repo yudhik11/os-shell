@@ -11,6 +11,10 @@ void fz(char *sz,long int val){
 void ls(){
     int hide=0,det=0,files=0;
     for (int i=1;i<cnt;i++){
+        if (input[i][0]=='&'){
+            execute(cnt);
+            return ;
+        }
         if (input[i][0]=='-'){
             for(int j=0;j<strlen(input[i]);j++){
                 if (input[i][j]=='a') hide=1;
