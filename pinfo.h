@@ -48,7 +48,7 @@ void pin(int self){
 		printf("Executable Path -- %s\n",buff+cwdlen);
 	}
 	else
-		printf("Executable Path -- ~/%s\n",buff);
+		printf("Executable Path -- ~%s\n",buff);
 	if(fp!=NULL){
 		fclose(fp);
 		fp = NULL;
