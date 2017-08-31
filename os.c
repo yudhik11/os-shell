@@ -19,55 +19,17 @@ char inp[10005];
 char cwd[1024];
 char pwd[1024];
 char *input2[1024];
+char paths[1023]={'\0'};
 int cnt=0,len=0;
 #include "echo.h"
 #include "pinfo.h"
 #include "cd.h"
 #include "execute.h"
 #include "ls.h"
+#include "verifycmd.h"
 #define KGRN  "\x1B[32m"
 #define KWHT  "\x1B[37m"
 #define KBLU  "\x1B[34m"
-
-int getwords(char *inpt){
-    cnt=0;
-    char *ch = strtok (inpt,"\" \t");
-    while (ch != NULL){
-        //printf("%s",input2[cnt]);
-        strcpy(input[cnt++],ch);
-        ch = strtok (NULL, " \"\t");
-    }
-    return cnt;
-}
-
-
-void verify_cmd(char *inpt){
-    cnt = getwords(inpt);
-    if (strcmp(input[0], "cd")==0){
-        implement_cd();
-    }
-    else if (strcmp(input[0],"echo")==0) 
-        echo();
-    else if (strcmp(input[0],"pwd")==0){
-        char temp[1023] = {'\0'};
-        getcwd(temp,sizeof (temp));
-        printf("%s\n",temp);
-    }
-    else if (strcmp(input[0],"ls")==0){
-        ls();
-    }
-    else if(strcmp(input[0],"pinfo")==0){
-        if(strlen(input[1])==0){
-            pin(1);
-        }
-        else{
-            pin(0);
-        }
-    }
-    else{
-        execute(cnt);
-    }
-}
 
 int calculte(char *arr,int l){
     int i,val=0,count=0,pwr=1;;
@@ -91,9 +53,11 @@ int main (){
     int k=20,l;
     int fd = creat("pid", 0600);
     close(fd);
+    strcpy (paths,cwd);
+    strcat(paths,"/pid");
     while(1){
         FILE *fp = NULL;
-        fp = fopen("pid","r+");
+        fp = fopen(paths,"r+");
         while(1){
             char st[1024];
             fgets(st,200,fp);
@@ -112,10 +76,7 @@ int main (){
         fclose(fp);
         pwd[1023] = '\0';
         getcwd(pwd,sizeof (pwd));
-        int pwdlen=strlen(pwd);
-		char compare[1024]={'\0'};
-		strcpy(compare,pwd);
-        if (strcmp(compare,cwd)==0 && pwdlen>=cwdlen)
+        if (strstr(pwd,cwd)!=NULL)            
             printf("%s<%s@%s:%s~%s>%s$ ",KGRN,hello->pw_name,hostname,KBLU,pwd+cwdlen,KWHT);
         else
             printf("%s<%s@%s:%s%s>%s$ ",KGRN,hello->pw_name,hostname,KBLU,pwd,KWHT);
