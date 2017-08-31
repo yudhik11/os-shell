@@ -91,9 +91,12 @@ int main (){
     int k=20,l;
     int fd = creat("pid", 0600);
     close(fd);
+    char paths[1024] = {'\0'};
+	strcpy(paths,cwd);
+	strcat(paths,"/pid");
     while(1){
         FILE *fp = NULL;
-        fp = fopen("pid","r+");
+		fp = fopen(paths,"r+");
         while(1){
             char st[1024];
             fgets(st,200,fp);
