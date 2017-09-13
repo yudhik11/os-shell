@@ -11,6 +11,10 @@ void fz(char *sz,long int val){
 void ls(){
     int hide=0,det=0,files=0;
     for (int i=1;i<cnt;i++){
+        if (input[i][0]=='&'){
+            execute(cnt);
+            return ;
+        }
         if (input[i][0]=='-'){
             for(int j=0;j<strlen(input[i]);j++){
                 if (input[i][j]=='a') hide=1;
@@ -92,6 +96,7 @@ void ls(){
         for (int i=1;i<cnt;i++)
             if (input[i][0]!='-'){
                 int flag=0;
+                //dir getdir(input[i]);
                 mydir = opendir(".");
                 while((myfile = readdir(mydir)) != NULL){
                     char *temp=myfile->d_name;
@@ -138,7 +143,7 @@ void ls(){
                     break;
                 }
                 if (flag==0)
-                    printf("ls: cannot access '%s': No such file or directory\n",input[i]);
+                    fprintf(stderr,"ls: cannot access '%s': No such file or directory\n",input[i]);
                 closedir(mydir);
             }
         if (!det) printf("\n");
