@@ -14,6 +14,7 @@
 #include<string.h>
 #include<fcntl.h>
 #include<math.h>
+#include<signal.h>
 char input[1005][1005];
 char inp[10005];
 char cwd[1024];
@@ -21,12 +22,17 @@ char pwd[1024];
 char *input2[1024];
 char paths[1023]={'\0'};
 int cnt=0,len=0;
+int in;
+int out;
 #include "echo.h"
 #include "pinfo.h"
 #include "cd.h"
+//#include "redirection.h"
 #include "execute.h"
 #include "ls.h"
+#include "jobs.h"
 #include "verifycmd.h"
+#include "pipeslin.h"
 #define KGRN  "\x1B[32m"
 #define KWHT  "\x1B[37m"
 #define KBLU  "\x1B[34m"
@@ -42,6 +48,8 @@ int calculte(char *arr,int l){
 }
 
 int main (){
+	in = dup(0);
+	out = dup(1);
 	char hostname[1024];
 	hostname[1023] = '\0';
 	cwd[1023] = '\0';
@@ -63,23 +71,27 @@ int main (){
 			fgets(st,200,fp);
 			if(feof(fp)) break;
 			// printf("%s",st);
-			if(st[0]=='z') continue;
-			int l = strlen(st);
-			int val = calculte(st,l);
+			if(st[0]=='0') continue;
+			int l = strlen(st+1);
+			char store[1024] = {'\0'};
+			for(int i=1;st[i]!=' ';i++){
+				store[i-1] = st[i];
+			}
+			int val = calculte(store,strlen(store)+1);
 			if(kill(val,0)!=0){
-				printf("[%d] has exited\n",val);
-				fseek(fp,-l,SEEK_CUR);
-				fputc('z',fp);
-				fseek(fp,(l-1),SEEK_CUR);
+				printf("[%s] has exited\n",store);
+				fseek(fp,-l-1,SEEK_CUR);
+				fputc('0',fp);
+				fseek(fp,(l),SEEK_CUR);
 			}
 		}
 		fclose(fp);
 		pwd[1023] = '\0';
 		getcwd(pwd,sizeof (pwd));
 		if (strstr(pwd,cwd)!=NULL)            
-			printf("%s<%s@%s:%s~%s>%s$ ",KGRN,hello->pw_name,hostname,KBLU,pwd+cwdlen,KWHT);
+			fprintf(stderr,"%s<%s@%s:%s~%s>%s$ ",KGRN,hello->pw_name,hostname,KBLU,pwd+cwdlen,KWHT);
 		else
-			printf("%s<%s@%s:%s%s>%s$ ",KGRN,hello->pw_name,hostname,KBLU,pwd,KWHT);
+			fprintf(stderr,"%s<%s@%s:%s%s>%s$ ",KGRN,hello->pw_name,hostname,KBLU,pwd,KWHT);
 		memset(inp,0,sizeof(inp));
 		char x=getchar();
 		if (x=='\n')
@@ -92,17 +104,24 @@ int main (){
 		if (strlen(inp)<=0) continue;
 		if ( inp[strlen(inp)-1]!=';') inp[strlen(inp)]=';';
 		cnt=0;
+		//		for(int i=0;i<1005;i++) input[i] = (char *)malloc(sizeof(char) * 1005);
 		char *string=inp;
-		char *cmd = strchr(string,';');
-		while (cmd != NULL){
-			memset(input,0,sizeof(input));
-			*cmd++='\0';
-			char *temp=string;
-			if (strlen(temp)==0) continue;
-			verify_cmd(temp);
-			string=cmd;
-			cmd = strchr (string,';');
-		}
+		//if(strstr(inp,"|")==NULL){
+			char *cmd = strchr(string,';');
+			while (cmd != NULL){
+				memset(input,0,sizeof(input));
+				*cmd++='\0';
+				char *temp=string;
+				if (strlen(temp)==0) continue;
+				if(strstr(temp,"|")==NULL) verify_cmd(temp);
+				else pipeLoop(temp);
+				dup2(0,in);
+				dup2(1,out);
+				string=cmd;
+				cmd = strchr (string,';');
+			}
+		//}
+		//else pipeLoop(string);
 	}
 	return 0;
 }
