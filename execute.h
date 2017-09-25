@@ -4,23 +4,29 @@
 void background_proc(){
     int pid = fork();
     if(pid==0){
-        int p = fork();
-        if(p==0){
-            fprintf(stderr,"[%d]\n",getpid());
+//        int p = fork();
+//        if(p==0){
             int fd = open(paths,O_RDWR | O_APPEND);
             char save[1024] = {'\0'};
-            sprintf(save,"%d\n",getpid());
+            int i=0;
+			char store[1024] = {'\0'};
+			while(input2[i]!=NULL){
+				strcat(store,input2[i++]);
+				strcat(store," ");
+			}
+			sprintf(save,"1%d %s[%d]\n",getpid(),store,getpid());
             write(fd,save,strlen(save));
-            close(fd);  
-            int val = execvp(input2[0],input2);
+            close(fd);
+			int val = execvp(input2[0],input2);
 			if(val < 0){
 				perror("Execution failed");
 			}
-        }
-		else exit(0);
+  //      }
+  //	  else exit(0);
 	}
     else{
-        wait(NULL);
+        fprintf(stderr,"[%d]\n",pid);
+        //wait(NULL);
     }
 }
 
