@@ -17,7 +17,7 @@ void pin(int self){
 	strcpy(save,str); // /proc/<pid>
 	strcat(save,"/status"); // /proc/<pid>/status
 	strcat(str,"/exe"); // str = /proc/<pid>/exe
-	printf("%s",save);
+	//printf("%s",save);
 	fp = fopen(save,"r");
 	if(fp==NULL){
 		perror("File Not Opened");
