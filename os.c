@@ -1,51 +1,4 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<unistd.h>
-#include<sys/utsname.h>
-#include<sys/stat.h>
-#include<sys/socket.h>
-#include<netdb.h>
-#include<sys/types.h>
-#include<sys/wait.h>
-#include<pwd.h>
-#include<grp.h>
-#include<time.h>
-#include<dirent.h>
-#include<string.h>
-#include<fcntl.h>
-#include<math.h>
-#include<signal.h>
-char input[1005][1005];
-char inp[10005];
-char cwd[1024];
-char pwd[1024];
-char *input2[1024];
-char paths[1023]={'\0'};
-int cnt=0,len=0;
-int in;
-int out;
-#include "echo.h"
-#include "pinfo.h"
-#include "cd.h"
-//#include "redirection.h"
-#include "execute.h"
-#include "ls.h"
-#include "jobs.h"
-#include "verifycmd.h"
-#include "pipeslin.h"
-#define KGRN  "\x1B[32m"
-#define KWHT  "\x1B[37m"
-#define KBLU  "\x1B[34m"
-
-int calculte(char *arr,int l){
-	int i,val=0,count=0,pwr=1;;
-	for (i = l-2; i>=0; i--)
-	{
-		val+=(arr[i]-'0')*pwr;
-		pwr*=10;
-	}
-	return val;
-}
+#include "header.h"
 
 int main (){
 	in = dup(0);
@@ -66,25 +19,52 @@ int main (){
 	while(1){
 		FILE *fp = NULL;
 		fp = fopen(paths,"r+");
+		if(fp==NULL){
+			perror("does not exist");
+		}
 		while(1){
-			char st[1024];
+			char st[1024],stor[1024];
 			fgets(st,200,fp);
 			if(feof(fp)) break;
-			// printf("%s",st);
 			if(st[0]=='0') continue;
 			int l = strlen(st+1);
 			char store[1024] = {'\0'};
 			for(int i=1;st[i]!=' ';i++){
 				store[i-1] = st[i];
 			}
-			int val = calculte(store,strlen(store)+1);
-			if(kill(val,0)!=0){
-				printf("[%s] has exited\n",store);
+			int val = calculater(store,strlen(store)+1);
+			char save[1024] = "/proc/";
+			strcat(save,store);
+			strcat(save,"/status");
+			FILE *fil = fopen(save,"r");
+			if(st[0]=='0' || fil==NULL){
+				fclose(fil);
+				continue;
+			}
+			else if(fil==NULL){
+				fprintf(stderr,"[%s] has exited\n",store);
 				fseek(fp,-l-1,SEEK_CUR);
 				fputc('0',fp);
 				fseek(fp,(l),SEEK_CUR);
+				fclose(fil);
 			}
-		}
+			else{
+				while(1){
+					fgets(stor,200,fil);
+					if(feof(fil)) break;
+					if(strstr(stor,"State") != NULL){
+						if(strstr(stor,"Z")){
+							fprintf(stderr,"[%s] has exited\n",store);
+							fseek(fp,-l-1,SEEK_CUR);
+							fputc('0',fp);
+							fseek(fp,(l),SEEK_CUR);
+							break;
+						}
+					}
+				}
+				fclose(fil);
+			}
+		}	
 		fclose(fp);
 		pwd[1023] = '\0';
 		getcwd(pwd,sizeof (pwd));

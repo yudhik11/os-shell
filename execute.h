@@ -5,7 +5,7 @@ void background_proc(){
     int pid = fork();
     if(pid==0){
 //        int p = fork();
-//        if(p==0){
+//      if(p==0){
             int fd = open(paths,O_RDWR | O_APPEND);
             char save[1024] = {'\0'};
             int i=0;
@@ -21,12 +21,12 @@ void background_proc(){
 			if(val < 0){
 				perror("Execution failed");
 			}
-  //      }
-  //	  else exit(0);
+//        }
+//  	  else exit(0);
 	}
     else{
         fprintf(stderr,"[%d]\n",pid);
-        //wait(NULL);
+//        wait(NULL);
     }
 }
 

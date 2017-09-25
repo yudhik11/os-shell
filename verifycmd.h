@@ -116,6 +116,9 @@ void verify_cmd(char *inpt){
 	else if(strcmp(input[0],"fg")==0){
 		fg();
 	}
+	else if(strcmp(input[0],"bg")==0){
+		bg();
+	}
 	else{
 		execute(cnt);
 	}
