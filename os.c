@@ -57,7 +57,19 @@ int calculte(char *arr,int l){
     }
     return val;
 }
-
+void sighandler(int sig_num)
+{
+    // Reset handler to catch SIGTSTP next time
+    signal(SIGTSTP, sighandler);
+    printf("\n");
+    fflush(stdout);
+}
+void child_handler(int sig)
+{
+        pid_t pid;
+        int status;
+        while((pid = waitpid(-1, &status, WNOHANG)) > 0);
+}
 int main (){
     in = dup(0);
     out = dup(1);
@@ -74,11 +86,19 @@ int main (){
     close(fd);
     strcpy (paths,cwd);
     strcat(paths,"/pid");
+    
     if (signal(SIGINT, handle_signals) == SIG_ERR) {
         printf("failed to register interrupts with kernel\n");
     }
     while ( sigsetjmp( ctrlc_buf, 1 ) != 0 );
-
+    signal(SIGTSTP, sighandler);
+    struct sigaction sa;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = child_handler;
+    sigaction(SIGCHLD, &sa, NULL);
+    
+    
     while(1){
         FILE *fp = NULL;
         fp = fopen(paths,"r+");
@@ -87,7 +107,6 @@ int main (){
             fgets(st,200,fp);
             if(feof(fp)) break;
             // printf("%s",st);
-            if(st[0]=='0') continue;
             int l = strlen(st+1);
             char store[1024] = {'\0'};
             for(int i=1;st[i]!=' ';i++){
@@ -110,13 +129,13 @@ int main (){
             fprintf(stderr,"%s<%s@%s:%s%s>%s$ ",KGRN,hello->pw_name,hostname,KBLU,pwd,KWHT);
         memset(inp,0,sizeof(inp));
         char x=getchar();
-        
-        
+
+
         if (x==EOF){
             printf("\n");
             continue;
         }
-        
+
         if (x=='\n')
             scanf("%[^\n]s",inp);
         else{
