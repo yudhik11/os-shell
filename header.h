@@ -15,6 +15,7 @@
 #include<fcntl.h>
 #include<math.h>
 #include<signal.h>
+#include<setjmp.h>
 char input[1005][1005];
 char inp[10005];
 char cwd[1024];
@@ -24,6 +25,7 @@ char paths[1023]={'\0'};
 int cnt=0,len=0;
 int in;
 int out;
+int pname=0;
 #define KGRN  "\x1B[32m"
 #define KWHT  "\x1B[37m"
 #define KBLU  "\x1B[34m"
@@ -40,6 +42,8 @@ int calculater(char *arr,int l){
 	return val;
 }
 
+sigjmp_buf ctrlc_buf;
+#include "errhandler.h"
 #include "echo.h"
 #include "pinfo.h"
 #include "cd.h"
@@ -51,4 +55,3 @@ int calculater(char *arr,int l){
 #include "kjob.h"
 #include "verifycmd.h"
 #include "pipeslin.h"
-

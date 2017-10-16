@@ -1,6 +1,7 @@
 #include "header.h"
 
 int main (){
+	pname=0;
 	in = dup(0);
 	out = dup(1);
 	char hostname[1024];
@@ -16,6 +17,18 @@ int main (){
 	close(fd);
 	strcpy (paths,cwd);
 	strcat(paths,"/pid");
+	
+	if (signal(SIGINT, handle_signals) == SIG_ERR) {
+		printf("failed to register interrupts with kernel\n");
+	}
+	while ( sigsetjmp( ctrlc_buf, 1 ) != 0 );
+	signal(SIGTSTP, sighandler);
+	struct sigaction sa;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = child_handler;
+	sigaction(SIGCHLD, &sa, NULL);
+
 	while(1){
 		FILE *fp = NULL;
 		fp = fopen(paths,"r+");
@@ -37,16 +50,16 @@ int main (){
 			strcat(save,store);
 			strcat(save,"/status");
 			FILE *fil = fopen(save,"r");
-			if(st[0]=='0' || fil==NULL){
+			/*if(st[0]=='0' || fil==NULL){
 				fclose(fil);
 				continue;
-			}
-			else if(fil==NULL){
-				fprintf(stderr,"[%s] has exited\n",store);
+			}*/
+			if(fil==NULL){
+				fprintf(stderr,"\n[%s] has exited\n",store);
 				fseek(fp,-l-1,SEEK_CUR);
 				fputc('0',fp);
 				fseek(fp,(l),SEEK_CUR);
-				fclose(fil);
+//				fclose(fil);
 			}
 			else{
 				while(1){
@@ -54,7 +67,7 @@ int main (){
 					if(feof(fil)) break;
 					if(strstr(stor,"State") != NULL){
 						if(strstr(stor,"Z")){
-							fprintf(stderr,"[%s] has exited\n",store);
+							fprintf(stderr,"\n[%s] has exited\n",store);
 							fseek(fp,-l-1,SEEK_CUR);
 							fputc('0',fp);
 							fseek(fp,(l),SEEK_CUR);
@@ -74,6 +87,11 @@ int main (){
 			fprintf(stderr,"%s<%s@%s:%s%s>%s$ ",KGRN,hello->pw_name,hostname,KBLU,pwd,KWHT);
 		memset(inp,0,sizeof(inp));
 		char x=getchar();
+		if (x==EOF){
+			printf("\n");
+			continue;
+		}
+
 		if (x=='\n')
 			scanf("%[^\n]s",inp);
 		else{
@@ -87,19 +105,19 @@ int main (){
 		//		for(int i=0;i<1005;i++) input[i] = (char *)malloc(sizeof(char) * 1005);
 		char *string=inp;
 		//if(strstr(inp,"|")==NULL){
-			char *cmd = strchr(string,';');
-			while (cmd != NULL){
-				memset(input,0,sizeof(input));
-				*cmd++='\0';
-				char *temp=string;
-				if (strlen(temp)==0) continue;
-				if(strstr(temp,"|")==NULL) verify_cmd(temp);
-				else pipeLoop(temp);
-				dup2(0,in);
-				dup2(1,out);
-				string=cmd;
-				cmd = strchr (string,';');
-			}
+		char *cmd = strchr(string,';');
+		while (cmd != NULL){
+			memset(input,0,sizeof(input));
+			*cmd++='\0';
+			char *temp=string;
+			if (strlen(temp)==0) continue;
+			if(strstr(temp,"|")==NULL) verify_cmd(temp);
+			else pipeLoop(temp);
+			dup2(0,in);
+			dup2(1,out);
+			string=cmd;
+			cmd = strchr (string,';');
+		}
 		//}
 		//else pipeLoop(string);
 	}

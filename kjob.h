@@ -4,7 +4,7 @@
 void kjob(){
 	FILE *fp = NULL;
 	fp = fopen(paths,"r+");
-	int counter = 0;
+	int calc,counter = 0;
 	while(1){
 		char st[1024];
 		fgets(st,200,fp);
@@ -16,8 +16,13 @@ void kjob(){
 			store[i-1] = st[i];
 		}
 		int val = calculater(store,strlen(store)+1);
-		if(counter==input[1][0]-'0' && strlen(input[1])==1){
-			if(strlen(input[2])==1) kill(val,input[2][0]-'0');
+        calc=(input[1][0]!=0?input[1][0]-48:0);
+        if (input[1][1]!=0) calc=(calc*10)+input[1][1]-48;
+		if(counter==calc){
+        	int calcul=(input[2][0]!=0?input[2][0]-48:0);
+        	if (input[2][1]!=0) calcul=(calcul*10)+input[2][1]-48;
+			printf("val:%d cal:%d\n",val,calcul);
+			kill(val,calcul);
 			break;
 		}
 	}

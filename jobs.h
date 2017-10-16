@@ -3,7 +3,7 @@
 void jobs(){
 	FILE *fp = NULL;
 	fp = fopen(paths,"r+");
-	int counter = 1;
+	int counter = 0;
 	while(1){
 		char st[1024];
 		fgets(st,200,fp);
@@ -19,7 +19,6 @@ void jobs(){
 		strcat(save,store);
 		strcat(save,"/status");
 		FILE *fil = fopen(save,"r");
-//		printf("%s\n",save);
 		if(fil==NULL){
 			perror("File not opened");
 			return;
