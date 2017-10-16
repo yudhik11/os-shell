@@ -11,7 +11,6 @@ int implement_cd(){
 		if(val < 0){
 			perror("cd failed");
 		}
-
         return 0;
     }
     if(ch[0]=='~'){
